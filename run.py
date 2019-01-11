@@ -4,11 +4,11 @@ import click
 from checks import run_checks
 from generate_tiles import render_tiles
 
-
 BASE_DIR = os.path.basename(__file__)
 
+
 def get_tile_dir():
-    return os.path.join(BASE_DIR,'tiles')
+    return os.path.join(BASE_DIR, 'tiles')
 
 
 @click.command('Generate tiles')
@@ -21,5 +21,6 @@ def run(min_zoom, max_zoom, mapfile):
     render_tiles(bbox, mapfile, '', min_zoom, max_zoom, "Europe+")
 
 
+
 if __name__ == '__main__':
-    # run()
+    run()
