@@ -28,7 +28,7 @@ class GoogleProjection:
         self.Ac = []
         c = 256
         for d in range(0, levels):
-            e = c / 2;
+            e = c / 2
             self.Bc.append(c / 360.0)
             self.Cc.append(c / (2 * pi))
             self.zc.append((e, e))
@@ -40,7 +40,7 @@ class GoogleProjection:
         e = round(d[0] + ll[0] * self.Bc[zoom])
         f = minmax(sin(DEG_TO_RAD * ll[1]), -0.9999, 0.9999)
         g = round(d[1] + 0.5 * log((1 + f) / (1 - f)) * -self.Cc[zoom])
-        return (e, g)
+        return e, g
 
     def fromPixelToLL(self, px, zoom):
         e = self.zc[zoom]
