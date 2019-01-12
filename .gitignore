@@ -1,3 +1,7 @@
 tiles
 .idea
 *.pyc
+tiles
+.tmp
+*.gpkg
+*.html

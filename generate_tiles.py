@@ -1,9 +1,12 @@
+from __future__ import print_function
+
 import os
 import threading
 from math import pi, sin, log, exp, atan
 
 import mapnik
 from Queue import Queue
+from utils import plus
 
 DEG_TO_RAD = pi / 180
 RAD_TO_DEG = 180 / pi
@@ -67,8 +70,8 @@ class RenderThread:
         p1 = ((x + 1) * 256, y * 256)
 
         # Convert to LatLong (EPSG:4326)
-        l0 = self.tileproj.fromPixelToLL(p0, z);
-        l1 = self.tileproj.fromPixelToLL(p1, z);
+        l0 = self.tileproj.fromPixelToLL(p0, z)
+        l1 = self.tileproj.fromPixelToLL(p1, z)
 
         # Convert to map projection (e.g. mercator co-ords EPSG:900913)
         c0 = self.prj.forward(mapnik.Coord(l0[0], l0[1]))
@@ -105,19 +108,13 @@ class RenderThread:
                 exists = "exists"
             else:
                 self.render_tile(tile_uri, x, y, z)
-            bytes = os.stat(tile_uri)[6]
-            empty = ''
-            if bytes == 103:
-                empty = " Empty Tile "
-            self.printLock.acquire()
-            print name, ":", z, x, y, exists, empty
-            self.printLock.release()
             self.q.task_done()
 
 
 def render_tiles(bbox, mapfile, tile_dir, minZoom=1, maxZoom=18, name="unknown", num_threads=NUM_THREADS,
                  tms_scheme=False):
-    print "render_tiles(", bbox, mapfile, tile_dir, minZoom, maxZoom, name, ")"
+    print("{} Generating tiles for {} bbox zoom levels [ {} - {} ] using {} mapnik mapfile".format(
+        plus, bbox, minZoom, maxZoom, mapfile))
 
     # Launch rendering threads
     queue = Queue(32)
@@ -178,4 +175,3 @@ def render_tiles(bbox, mapfile, tile_dir, minZoom=1, maxZoom=18, name="unknown",
     queue.join()
     for i in range(num_threads):
         renderers[i].join()
-
