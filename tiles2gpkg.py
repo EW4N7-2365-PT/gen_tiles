@@ -42,6 +42,8 @@ from rgi.geopackage.srs.geodetic_nsg import GeodeticNSG
 from rgi.geopackage.srs.mercator import Mercator
 from rgi.geopackage.srs.scaled_world_mercator import ScaledWorldMercator
 from tempDB import TempDB
+from utils import plus, minus
+from termcolor import colored
 
 try:
     from cStringIO import StringIO as ioBuffer
@@ -71,8 +73,6 @@ except ImportError:
 # PNGs should be used sparingly (mixed mode) due to their high disk usage RGBA
 # Options are mixed, jpeg, and png
 IMAGE_TYPES = '.png', '.jpeg', '.jpg'
-
-
 
 
 def write_geopackage_header(file_path):
@@ -161,14 +161,13 @@ def file_count(base_dir):
     A list of dictionary objects containing the full file path and TMS
     coordinates of the image tile.
     """
-    print("Calculating number of tiles, this could take a while...")
     file_list = []
     # Avoiding dots (functional references) will increase performance of
     #  the loop because they will not be reevaluated each iteration.
     for root, sub_folders, files in walk(base_dir):
         temp_list = [join(root, f) for f in files if f.endswith(IMAGE_TYPES)]
         file_list += temp_list
-    print("Found {} total tiles.".format(len(file_list)))
+    print("{} Found {} total tiles.".format(plus, len(file_list)))
     return [split_all(item) for item in file_list]
 
 
@@ -259,7 +258,7 @@ def sqlite_worker(file_list, extra_args):
     """
     # TODO create the tempDB by adding the table name and telling which type (tiles/vectortiles)
     temp_db = TempDB(extra_args['root_dir'], extra_args['table_name'])
-    with TempDB(extra_args['root_dir'],  extra_args['table_name']) as temp_db:
+    with TempDB(extra_args['root_dir'], extra_args['table_name']) as temp_db:
         invert_y = None
         if extra_args['lower_left']:
             if extra_args['srs'] == 3857:
@@ -273,7 +272,7 @@ def sqlite_worker(file_list, extra_args):
                 invert_y = EllipsoidalMercator.invert_y
             elif extra_args['srs'] == 9804:
                 invert_y = ScaledWorldMercator.invert_y
-                #TODO update for retile
+                # TODO update for retile
         [worker_map(temp_db, item, extra_args, invert_y) for item in file_list]
 
 
@@ -284,7 +283,7 @@ def allocate(cores, pool, file_list, extra_args):
     not, then N is the largest factor of 8 that is still less than C.
     """
     if cores is 1:
-        print("Spawning worker with {} files".format(len(file_list)))
+        print("{} Spawning worker with {} files".format(plus, len(file_list)))
         return [pool.apply_async(sqlite_worker, [file_list, extra_args])]
     else:
         files = len(file_list)
@@ -475,7 +474,7 @@ def combine_worker_dbs(out_geopackage):
         base_dir = "."
     glob_path = join(base_dir + '/*.gpkg.part')
     file_list = glob(glob_path)
-    print("Merging temporary databases...")
+    print("\n{} Merging temporary databases...".format(plus))
     # [out_geopackage.assimilate(f) for f in file_list]
     itr = len(file_list)
     status = ["|", "/", "-", "\\"]
@@ -485,7 +484,7 @@ def combine_worker_dbs(out_geopackage):
         itr -= 1
         out_geopackage.assimilate(tdb)
         if tdb == file_list[-1]:
-            stdout.write("\r[X] Progress: [" + "==" * comp + "  " * itr + "]")
+            stdout.write("\r" + colored('[X]', 'green') + " Progress: [" + "==" * comp + "  " * itr + "]")
         else:
             stdout.write("\r[" + status[counter] + "] Progress: [" + "==" *
                          comp + "  " * itr + "]")
@@ -494,7 +493,7 @@ def combine_worker_dbs(out_geopackage):
             counter += 1
         else:
             counter = 0
-    print(" All geopackages merged!")
+    print("\n{} All geopackages merged".format(plus))
 
 
 def main(arg_list):
@@ -546,10 +545,9 @@ def main(arg_list):
             while True:
                 rem = sum([1 for item in results if not item.ready()])
                 if rem == 0:
-                    stdout.write("\r[X] Progress: [" + "==" * (cores - rem) +
+                    stdout.write("\r" + colored('[X]', 'green') + " Progress: [" + "==" * (cores - rem) +
                                  "  " * rem + "]")
                     stdout.flush()
-                    print(" All Done!")
                     break
                 else:
                     stdout.write("\r[" + status[counter] + "] Progress: [" +
@@ -563,7 +561,7 @@ def main(arg_list):
             pool.close()
             pool.join()
         except KeyboardInterrupt:
-            print(" Interrupted!")
+            print("{} Interrupted".format(minus))
             pool.terminate()
             exit(1)
     else:
@@ -598,101 +596,4 @@ def main(arg_list):
     if LooseVersion(sqlite_version) < LooseVersion(PRAGMA_MINIMUM_SQLITE_VERSION):
         write_geopackage_header(arg_list.output_file)
 
-    print("Complete")
-
-
-if __name__ == '__main__':
-    print("""
-        tiles2gpkg_parallel.py  Copyright (C) 2014  Reinventing Geospatial, Inc
-        This program comes with ABSOLUTELY NO WARRANTY.
-        This is free software, and you are welcome to redistribute it
-        under certain conditions.
-    """)
-    PARSER = ArgumentParser(description="Convert TMS folder into geopackage")
-    PARSER.add_argument("source_folder",
-                        metavar="source",
-                        help="Source folder of TMS files.")
-    PARSER.add_argument("output_file",
-                        metavar="dest",
-                        help="Destination file path.")
-    PARSER.add_argument("-tileorigin",
-                        metavar="tile_origin",
-                        help="Tile point of origin location. Valid options " +
-                             "are ll, ul, nw, or sw.",
-                        choices=["ll", "ul", "sw", "nw"],
-                        default="ll")
-    PARSER.add_argument("-srs",
-                        metavar="srs",
-                        help="Spatial reference " + "system. Valid options are"
-                             + "3857, 4326, 3395, and 9804.",
-                        type=int,
-                        choices=[3857, 4326, 3395, 9804],
-                        default=3857)
-
-    # TODO: to support vector tiles, expand the choices to include "MVT" and "GeoJSON"
-    PARSER.add_argument("-imagery",
-                        metavar="imagery",
-                        help="Imagery type. Valid options are mixed, " +
-                             "jpeg, png, or source.",
-                        choices=["mixed", "jpeg", "png", "source"],
-                        default="source")
-
-    PARSER.add_argument("-table_name",
-                        metavar="table_name",
-                        help="The name of the tiles table.",
-                        default="tiles")
-
-    PARSER.add_argument("-q",
-                        metavar="quality",
-                        type=int,
-                        default=75,
-                        help="Quality for jpeg images, 0-100. Default is 75",
-                        choices=list(range(100)))
-    PARSER.add_argument("-a",
-                        dest="append",
-                        action="store_true",
-                        default=False,
-                        help="Append tile set to existing geopackage")
-    PARSER.add_argument("-T",
-                        dest="threading",
-                        action="store_false",
-                        default=True,
-                        help="Disable multiprocessing.")
-    PARSER.add_argument("-renumber",
-                        dest="renumber",
-                        action="store_true",
-                        default=False,
-                        help="Enable re-numbering tiles/zoom levels from standard Geodetic to NSG geodetic. Only valid"
-                             "if the NSG Profile is enabled.")
-    group = PARSER.add_mutually_exclusive_group(required=False)
-    group.add_argument("-nsg",
-                       dest="nsg_profile",
-                       help="Enforce NSG Profile Requirements on output GeoPackage. Currently Requires data to"
-                            "use the EPSG:4326 Global Geodetic projection. Note: it will not convert tiles to the"
-                            "proper Tile Matrix, they MUST tiled correctly to be packaged correctly.",
-                       action='store_true',
-                       )
-    group.add_argument("-ogc",
-                       dest="nsg_profile",
-                       help="Follow OGC GeoPackage specification without NSG Profile additions",
-                       action='store_false')
-    PARSER.set_defaults(nsg_profile=False)
-
-    ARG_LIST = PARSER.parse_args()
-    if not exists(ARG_LIST.source_folder) or exists(ARG_LIST.output_file):
-        PARSER.print_usage()
-        print("Ensure that TMS directory exists and out file does not.")
-        exit(1)
-    if ARG_LIST.q is not None and ARG_LIST.imagery == 'png':
-        PARSER.print_usage()
-        print("-q cannot be used with png")
-        exit(1)
-    if ARG_LIST.nsg_profile and ARG_LIST.srs != 4326:
-        PARSER.print_usage()
-        print("-nsg requires that -srs be set to 4326")
-        exit(1)
-    if not ARG_LIST.nsg_profile and ARG_LIST.renumber:
-        PARSER.print_usage()
-        print("-renumber requires that the -nsg flag also be active")
-
-    main(ARG_LIST)
+    print("{} GPKG with tiles created.".format(plus))

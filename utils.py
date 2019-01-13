@@ -7,7 +7,8 @@ plus = colored('[+]', 'green')
 minus = colored('[-]', 'red')
 
 
-def execute(program, *args):
-    ret = subprocess.Popen([program, args]).wait()
+def execute(*args):
+    ret = subprocess.Popen(args).wait()
     if ret != 0:
-        print('{} {} exited with {}'.format(minus, program, ret))
+        print('{} {} exited with {}'.format(minus, args[0], ret))
+        sys.exit(-1)

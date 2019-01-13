@@ -1,0 +1,2 @@
+TARGET_MAP_EPSG = 3857  # Google
+INITIAL_GDPKG_FILENAME = 'out.gpkg'

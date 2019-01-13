@@ -7,7 +7,6 @@ from math import pi, sin, log, exp, atan
 import mapnik
 from Queue import Queue
 from utils import plus
-
 DEG_TO_RAD = pi / 180
 RAD_TO_DEG = 180 / pi
 
