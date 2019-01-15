@@ -32,6 +32,12 @@ Version:
 """
 
 from glob import glob
+from sqlite3 import sqlite_version
+from sqlite3 import Binary as sbinary
+from os import walk
+from os.path import split, join
+from multiprocessing import cpu_count, Pool
+from distutils.version import LooseVersion
 
 from rgi.geopackage.common.zoom_metadata import ZoomMetadata
 from rgi.geopackage.geopackage import Geopackage, PRAGMA_MINIMUM_SQLITE_VERSION
@@ -55,14 +61,6 @@ from sys import version_info
 
 if version_info[0] == 3:
     xrange = range
-
-from sqlite3 import sqlite_version
-from argparse import ArgumentParser
-from sqlite3 import Binary as sbinary
-from os import walk
-from os.path import split, join, exists
-from multiprocessing import cpu_count, Pool
-from distutils.version import LooseVersion
 
 try:
     from PIL.Image import open as IOPEN
