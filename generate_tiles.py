@@ -4,11 +4,9 @@ import os
 import threading
 from math import pi, sin, log, exp, atan
 import multiprocessing
-
 import mapnik
 from Queue import Queue
 from utils import plus
-
 DEG_TO_RAD = pi / 180
 RAD_TO_DEG = 180 / pi
 
@@ -92,7 +90,7 @@ class RenderThread:
         # Render image with default Agg renderer
         im = mapnik.Image(render_size, render_size)
         mapnik.render(self.m, im)
-        im.save(tile_uri, 'png8')
+        im.save(tile_uri, 'png256')
 
     def loop(self):
         while True:
@@ -112,7 +110,7 @@ class RenderThread:
             self.q.task_done()
 
 
-def render_tiles(bbox, mapfile, tile_dir, minZoom=1, maxZoom=10, name="unknown", num_threads=NUM_THREADS,
+def render_tiles(bbox, mapfile, tile_dir, minZoom=1, maxZoom=18, name="unknown", num_threads=NUM_THREADS,
                  tms_scheme=False):
     print("{} Generating tiles for {} bbox zoom levels [ {} - {} ] using {} mapnik mapfile".format(
         plus, bbox, minZoom, maxZoom, mapfile))
@@ -125,6 +123,7 @@ def render_tiles(bbox, mapfile, tile_dir, minZoom=1, maxZoom=10, name="unknown",
         renderer = RenderThread(tile_dir, mapfile, queue, printLock, maxZoom)
         render_thread = threading.Thread(target=renderer.loop)
         render_thread.start()
+        print("{} Started render thread {}".format(plus, render_thread.getName()))
         renderers[i] = render_thread
 
     if not os.path.isdir(tile_dir):

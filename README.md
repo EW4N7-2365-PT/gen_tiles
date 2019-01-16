@@ -1,3 +1,7 @@
+
+![arch](static/img.png "Arch")
+
+
 # ubuntu 18.04 LTS
 ```
 sudo apt-get install libboost-all-dev libfreetype6-dev \

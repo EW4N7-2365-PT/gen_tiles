@@ -28,3 +28,21 @@ def check_gdal_version():
         print('{} Install GDAL'.format(minus))
     if pipe.returncode == 0 and text:
         print('{} GDAL {} installed'.format(plus, text))
+
+
+def check_carto():
+    pipe = Popen(['carto', '-v'], stdout=PIPE)
+    text = pipe.communicate()[0].replace('\n', '')
+    if pipe.returncode == 0 and text:
+        print('{} carto {} installed'.format(plus, text))
+
+
+def check_git():
+    pipe = Popen(['git', '--version'], stdout=PIPE)
+    text = pipe.communicate()[0].replace('\n', '')
+    if pipe.returncode == 0 and text:
+        print('{} {} installed'.format(plus, text))
+
+
+if __name__ == "__main__":
+    run_checks()
