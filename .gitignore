@@ -4,5 +4,7 @@ tiles
 tiles
 .tmp
 tmp
-
+*.template.mml
+*.template.xml
+osm.xml
 *.gpkg

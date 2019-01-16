@@ -13,7 +13,7 @@ from utils import plus, execute, minus
 from gpkg import make_gpkg_from_tiles
 import bbox_cities
 from constants import TMP_DIR, BUILD_DIR, TILES_DIR
-from generate_mapnik_mapfile import fetch_openstreetmap_carto_styles
+from generate_mapnik_mapfile import compile_osm_styles
 
 
 @click.command('Generate tiles')
@@ -46,11 +46,10 @@ def run(min_zoom, max_zoom, bbox_code, no_cleanup, quality, write_leaflet):
     print('{} tiles created'.format(plus))
 
     make_gpkg_from_tiles(quality, today)
-
+    compile_osm_styles()
     if not no_cleanup:
         shutil.rmtree(TMP_DIR)
         print('{} tmp dir deleted'.format(plus))
-    fetch_openstreetmap_carto_styles()
 
 
 if __name__ == '__main__':

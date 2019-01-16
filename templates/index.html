@@ -18,16 +18,23 @@
 <div id="mapid"></div>
 <script>
      var mymap = L.map('mapid',{
-    crs: L.CRS.EPSG3857
-}).setView([50.064651, 19.944981], 18);
+    crs: L.CRS.EPSG3857,
+}).setView([50.064651, 19.944981], 14);
      L.tileLayer('http://0.0.0.0:8000/{z}/{x}/{y}.png', {
-    maxZoom: 18,
+    maxZoom: 17,
     tms: true
 }).addTo(mymap);
     L.control.scale().addTo(mymap);
     mymap.on('zoomend', () => {
   document.getElementById("zoom").innerHTML = mymap.getZoom();
 });
+
+var circle = L.circle([50.064651, 19.944981], {
+    color: 'red',
+    fillColor: '#f03',
+    fillOpacity: 0.5,
+    radius: 500
+}).addTo(mymap);
 </script>
 </body>
 </html>
