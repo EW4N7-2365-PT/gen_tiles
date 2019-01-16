@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" crossorigin=""></script>
+    <style>
+        #mapid { height: 750px; width: 750px; }
+        #zoom { font-size: 3em }
+    </style>
+</head>
+<body>
+<div id="zoom">-</div>
+<div id="mapid"></div>
+<script>
+     var mymap = L.map('mapid',{
+    crs: L.CRS.EPSG3857
+}).setView([50.064651, 19.944981], 18);
+     L.tileLayer('http://0.0.0.0:8000/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    tms: true
+}).addTo(mymap);
+    L.control.scale().addTo(mymap);
+    mymap.on('zoomend', () => {
+  document.getElementById("zoom").innerHTML = mymap.getZoom();
+});
+</script>
+</body>
+</html>

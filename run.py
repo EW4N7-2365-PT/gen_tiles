@@ -21,8 +21,7 @@ from constants import TMP_DIR, BUILD_DIR, TILES_DIR
 @click.option('--bbox-code', required=True)
 @click.option('--no-cleanup', is_flag=True, default=False)
 @click.option('--quality', default=75)
-@click.option('--tiles-format', default='jpeg', type=click.Choice(['jpeg', 'png']))
-def run(min_zoom, max_zoom, bbox_code, no_cleanup, quality, tiles_format):
+def run(min_zoom, max_zoom, bbox_code, no_cleanup, quality):
     if not hasattr(bbox_cities, bbox_code.upper()):
         print('{} bbox code not found in bbox_cities.py'.format(minus))
         sys.exit(-1)
@@ -38,14 +37,13 @@ def run(min_zoom, max_zoom, bbox_code, no_cleanup, quality, tiles_format):
             'PG:user=postgres password=12345 dbname=test1 tables=planet_osm_roads')
     print('{} Initial dpkg created'.format(plus))
     today = datetime.today()
-    render_tiles(getattr(bbox_cities, bbox_code), '/tmp/openstreetmap-carto/osm.xml', TILES_DIR,
-                 tiles_format, min_zoom, max_zoom,
+    render_tiles(getattr(bbox_cities, bbox_code), '/home/kamil/src/openstreetmap-carto/osm.xml', TILES_DIR, min_zoom,
+                 max_zoom,
                  tms_scheme=True)
     print('{} tiles created'.format(plus))
 
-    make_gpkg_from_tiles(quality, tiles_format, today)
-    shutil.copy('tmp/out.{}.gpkg'.format(today), BUILD_DIR)
-    print('{} Final gpkg moved to build dir'.format(plus))
+    make_gpkg_from_tiles(quality, today)
+
     if not no_cleanup:
         shutil.rmtree(TMP_DIR)
         print('{} tmp dir deleted'.format(plus))

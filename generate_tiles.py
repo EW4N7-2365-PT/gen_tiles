@@ -3,6 +3,7 @@ from __future__ import print_function
 import os
 import threading
 from math import pi, sin, log, exp, atan
+import multiprocessing
 
 import mapnik
 from Queue import Queue
@@ -11,7 +12,7 @@ from utils import plus
 DEG_TO_RAD = pi / 180
 RAD_TO_DEG = 180 / pi
 
-NUM_THREADS = 4
+NUM_THREADS = multiprocessing.cpu_count()
 
 
 def minmax(a, b, c):
@@ -51,12 +52,11 @@ class GoogleProjection:
 
 
 class RenderThread:
-    def __init__(self, tile_dir, tiles_format, mapfile, q, printLock, maxZoom):
+    def __init__(self, tile_dir, mapfile, q, printLock, maxZoom):
         self.tile_dir = tile_dir
         self.q = q
         self.m = mapnik.Map(256, 256)
         self.printLock = printLock
-        self.tiles_format = tiles_format
         # Load style XML
         mapnik.load_map(self.m, mapfile, True)
         # Obtain <Map> projection
@@ -92,7 +92,7 @@ class RenderThread:
         # Render image with default Agg renderer
         im = mapnik.Image(render_size, render_size)
         mapnik.render(self.m, im)
-        im.save(tile_uri, 'jpeg')
+        im.save(tile_uri, 'png8')
 
     def loop(self):
         while True:
@@ -112,7 +112,7 @@ class RenderThread:
             self.q.task_done()
 
 
-def render_tiles(bbox, mapfile, tile_dir, tiles_format, minZoom=1, maxZoom=10, name="unknown", num_threads=NUM_THREADS,
+def render_tiles(bbox, mapfile, tile_dir, minZoom=1, maxZoom=10, name="unknown", num_threads=NUM_THREADS,
                  tms_scheme=False):
     print("{} Generating tiles for {} bbox zoom levels [ {} - {} ] using {} mapnik mapfile".format(
         plus, bbox, minZoom, maxZoom, mapfile))
@@ -122,7 +122,7 @@ def render_tiles(bbox, mapfile, tile_dir, tiles_format, minZoom=1, maxZoom=10, n
     printLock = threading.Lock()
     renderers = {}
     for i in range(num_threads):
-        renderer = RenderThread(tile_dir, tiles_format, mapfile, queue, printLock, maxZoom)
+        renderer = RenderThread(tile_dir, mapfile, queue, printLock, maxZoom)
         render_thread = threading.Thread(target=renderer.loop)
         render_thread.start()
         renderers[i] = render_thread
@@ -160,7 +160,7 @@ def render_tiles(bbox, mapfile, tile_dir, tiles_format, minZoom=1, maxZoom=10, n
                     str_y = "%s" % ((2 ** z - 1) - y)
                 else:
                     str_y = "%s" % y
-                tile_uri = tile_dir + zoom + '/' + str_x + '/' + str_y + '.' + tiles_format
+                tile_uri = tile_dir + zoom + '/' + str_x + '/' + str_y + '.png'
                 # Submit tile to be rendered into the queue
                 t = (name, tile_uri, x, y, z)
                 try:
