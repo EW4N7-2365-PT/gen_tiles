@@ -8,3 +8,5 @@ tmp
 *.template.xml
 osm.xml
 *.gpkg
+styles
+.timestamp

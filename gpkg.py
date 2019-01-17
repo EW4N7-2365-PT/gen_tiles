@@ -4,7 +4,7 @@ from datetime import datetime
 from tiles2gpkg import main
 from utils import execute, plus
 from argparse import Namespace
-from constants import TMP_DIR, BUILD_DIR
+from settings import TMP_DIR, BUILD_DIR
 
 
 def make_initial_gpkg(conf):
