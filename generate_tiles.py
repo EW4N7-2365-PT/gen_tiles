@@ -7,6 +7,7 @@ import multiprocessing
 import mapnik
 from Queue import Queue
 from utils import plus
+
 DEG_TO_RAD = pi / 180
 RAD_TO_DEG = 180 / pi
 
@@ -77,10 +78,7 @@ class RenderThread:
         c1 = self.prj.forward(mapnik.Coord(l1[0], l1[1]))
 
         # Bounding box for the tile
-        if hasattr(mapnik, 'mapnik_version') and mapnik.mapnik_version() >= 800:
-            bbox = mapnik.Box2d(c0.x, c0.y, c1.x, c1.y)
-        else:
-            bbox = mapnik.Envelope(c0.x, c0.y, c1.x, c1.y)
+        bbox = mapnik.Box2d(c0.x, c0.y, c1.x, c1.y)
         render_size = 256
         self.m.resize(render_size, render_size)
         self.m.zoom_to_box(bbox)
@@ -96,17 +94,13 @@ class RenderThread:
         while True:
             # Fetch a tile from the queue and render it
             r = self.q.get()
-            if (r == None):
+            if r is None:
                 self.q.task_done()
                 break
             else:
                 (name, tile_uri, x, y, z) = r
 
-            exists = ""
-            if os.path.isfile(tile_uri):
-                exists = "exists"
-            else:
-                self.render_tile(tile_uri, x, y, z)
+            self.render_tile(tile_uri, x, y, z)
             self.q.task_done()
 
 

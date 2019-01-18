@@ -30,7 +30,6 @@ Version:
 """
 
 from rgi.geopackage.core.geopackage_core import GeoPackageCore
-from rgi.geopackage.geopackage import DEFAULT_TILES_IDENTIFIER
 from rgi.geopackage.tiles.geopackage_tiles import GeoPackageTiles
 from rgi.geopackage.tiles.tiles_content_entry import TilesContentEntry
 from rgi.geopackage.utility.sql_utility import get_database_connection
@@ -66,7 +65,7 @@ class TempDB(object):
     def __init__(self,
                  filename,
                  tiles_table_name,
-                 tiles_identifier=DEFAULT_TILES_IDENTIFIER):
+                 tiles_identifier='osm_tiles'):
         """
         Constructor.
 

@@ -1,36 +1,3 @@
-#!/usr/bin/python2.7
-"""
-Copyright (C) 2014 Reinventing Geospatial, Inc.
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>,
-or write to the Free Software Foundation, Inc., 59 Temple Place -
-Suite 330, Boston, MA 02111-1307, USA.
-
-Author: Steven D. Lander, Reinventing Geospatial Inc (RGi)
-Date: 2013-07-12
-   Requires: sqlite3, argparse
-   Optional: Python Imaging Library (PIL or Pillow)
-Description: Converts a TMS folder into a geopackage with
- PNGs for images with transparency and JPEGs for those
- without.
-Credits:
-  MapProxy imaging functions: http://mapproxy.org
-  gdal2mb on github: https://github.com/developmentseed/gdal2mb
-
-Version:
-"""
-
 from glob import glob
 from sqlite3 import sqlite_version
 from sqlite3 import Binary as sbinary
@@ -58,14 +25,10 @@ except ImportError:
 from time import sleep
 from sys import stdout
 from sys import version_info
+from PIL.Image import open as IOPEN
 
 if version_info[0] == 3:
     xrange = range
-
-try:
-    from PIL.Image import open as IOPEN
-except ImportError:
-    IOPEN = None
 
 # JPEGs @ 75% provide good quality images with low footprint, use as a default
 # PNGs should be used sparingly (mixed mode) due to their high disk usage RGBA
@@ -255,7 +218,6 @@ def sqlite_worker(file_list, extra_args):
                 the tiles in the TMS directory
     """
     # TODO create the tempDB by adding the table name and telling which type (tiles/vectortiles)
-    temp_db = TempDB(extra_args['root_dir'], extra_args['table_name'])
     with TempDB(extra_args['root_dir'], extra_args['table_name']) as temp_db:
         invert_y = None
         if extra_args['lower_left']:
@@ -473,7 +435,6 @@ def combine_worker_dbs(out_geopackage):
     glob_path = join(base_dir + '/*.gpkg.part')
     file_list = glob(glob_path)
     print("\n{} Merging temporary databases...".format(plus))
-    # [out_geopackage.assimilate(f) for f in file_list]
     itr = len(file_list)
     status = ["|", "/", "-", "\\"]
     counter = 0
@@ -494,7 +455,7 @@ def combine_worker_dbs(out_geopackage):
     print("\n{} All geopackages merged".format(plus))
 
 
-def main(arg_list):
+def make_gpkg(arg_list):
     """
     Create a geopackage from a directory of tiles arranged in TMS or WMTS
     format.

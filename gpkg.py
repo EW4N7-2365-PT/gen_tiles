@@ -1,28 +1,30 @@
 import shutil
-from datetime import datetime
 
-from tiles2gpkg import main
+from tiles2gpkg import make_gpkg
 from utils import execute, plus
 from argparse import Namespace
-from settings import TMP_DIR, BUILD_DIR
-
-
-def make_initial_gpkg(conf):
-    pass
+from settings import TMP_DIR
 
 
 def merge_layers():
     pass
 
 
-def make_gpkg_from_tiles(quality, today):
-    nmspc = Namespace(append=False, imagery='png', nsg_profile=False,
-                      output_file='{}out.{}.gpkg'.format(TMP_DIR, today),
-                      q=quality,
-                      renumber=False, source_folder='tmp/tiles', srs=3857, table_name='appended1', threading=True,
-                      tileorigin='ll')
-    main(nmspc)
-    execute('ogr2ogr', '-f', 'GPKG', 'tmp/out.{}.gpkg'.format(today), 'tmp/out.gpkg', '-update', '-append')
+def make_initial_gpkg():
+    execute('ogr2ogr', '-f', 'GPKG', 'tmp/initial.gpkg',
+            'PG:user=postgres password=12345 dbname=test_style tables=planet_osm_roads')
+    print('{} Initial dpkg created'.format(plus))
 
-    shutil.copy('tmp/out.{}.gpkg'.format(today), BUILD_DIR)
-    print('{} Final gpkg moved to build dir'.format(plus))
+
+def make_gpkg_from_tiles(quality, filename):
+    nmspc = Namespace(append=True,
+                      imagery='png',
+                      nsg_profile=False,
+                      output_file='{}out.{}.gpkg'.format(TMP_DIR, filename),
+                      q=quality,
+                      renumber=False,
+                      source_folder='tmp/tiles',
+                      srs=3857, table_name='osm_tiles',
+                      threading=True,
+                      tileorigin='ll')
+    make_gpkg(nmspc)
