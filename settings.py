@@ -1,6 +1,5 @@
 import os
 
-TARGET_MAP_EPSG = 3857  # Google
 INITIAL_GDPKG_FILENAME = 'out.gpkg'
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -16,4 +15,9 @@ PG = {
     'password': '12345',
     'host': 'localhost',
     'port': '5432'
+}
+
+FEATURE_TABLES = {
+    'POSTGIS_DATASOURCE': PG,
+    'TABLES': []
 }

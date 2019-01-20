@@ -1,47 +1,49 @@
 from __future__ import print_function
-from utils import plus, minus
 import sys
 from subprocess import Popen, PIPE
+
+from utils import plus, minus
 
 
 def run_checks():
     [c() for name, c in globals().items() if callable(c) and name.startswith('check')]
 
 
+def get_version_or_exit(program, version):
+    try:
+        return Popen([program, version], stdout=PIPE).communicate()[0].replace('\n', '')
+    except (OSError, IndexError):
+        print('{} install {}'.format(minus, program))
+        sys.exit(-1)
+
+
 def check_mapnik_config():
     try:
         import mapnik
-        if hasattr(mapnik, 'mapnik_version'):
-            print('{} mapnik {} installed'.format(plus, mapnik.mapnik_version()))
+        print('{} mapnik {} installed'.format(plus, mapnik.mapnik_version()))
     except ImportError:
         print('{} install mapnik'.format(minus))
         sys.exit(-1)
 
 
 def check_gdal_version():
-    pipe = Popen(['gdalinfo', '--version'], stdout=PIPE)
-    text = None
-    try:
-
-        text = pipe.communicate()[0].split(' ')[1][:-1]
-    except IndexError:
-        print('{} Install GDAL'.format(minus))
-    if pipe.returncode == 0 and text:
-        print('{} GDAL {} installed'.format(plus, text))
+    gdal = get_version_or_exit('gdalinfo', '--version')
+    print("{} {} installed".format(plus, gdal))
 
 
 def check_carto():
-    pipe = Popen(['carto', '-v'], stdout=PIPE)
-    text = pipe.communicate()[0].replace('\n', '')
-    if pipe.returncode == 0 and text:
-        print('{} carto {} installed'.format(plus, text))
+    carto = get_version_or_exit('carto', '--version')
+    print("{} carto {} installed".format(plus, carto))
 
 
 def check_git():
-    pipe = Popen(['git', '--version'], stdout=PIPE)
-    text = pipe.communicate()[0].replace('\n', '')
-    if pipe.returncode == 0 and text:
-        print('{} {} installed'.format(plus, text))
+    git = get_version_or_exit('git', '--version')
+    print("{} {} installed".format(plus, git))
+
+
+def check_node():
+    node = get_version_or_exit('node', '--version')
+    print("{} node {} installed".format(plus, node))
 
 
 if __name__ == "__main__":

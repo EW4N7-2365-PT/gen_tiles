@@ -1,5 +1,4 @@
 from __future__ import print_function
-
 import os
 import shutil
 import sys
@@ -56,8 +55,8 @@ def run(min_zoom, max_zoom, bbox_code, quality, only_tiles):
     shutil.copy('tmp/out.{}.gpkg'.format(filename), BUILD_DIR)
     print('{} Final gpkg moved to build dir'.format(plus))
 
-    shutil.rmtree(TMP_DIR)
-    print('{} tmp dir deleted'.format(plus))
+    # shutil.rmtree(TMP_DIR)
+    # print('{} tmp dir deleted'.format(plus))
 
 
 if __name__ == '__main__':

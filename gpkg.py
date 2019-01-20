@@ -1,8 +1,7 @@
-import shutil
+from argparse import Namespace
 
 from tiles2gpkg import make_gpkg
 from utils import execute, plus
-from argparse import Namespace
 from settings import TMP_DIR
 
 

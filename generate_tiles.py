@@ -1,11 +1,12 @@
 from __future__ import print_function
-
 import os
 import threading
 from math import pi, sin, log, exp, atan
 import multiprocessing
-import mapnik
 from Queue import Queue
+
+import mapnik
+
 from utils import plus
 
 DEG_TO_RAD = pi / 180
@@ -88,7 +89,7 @@ class RenderThread:
         # Render image with default Agg renderer
         im = mapnik.Image(render_size, render_size)
         mapnik.render(self.m, im)
-        im.save(tile_uri, 'png8')
+        im.save(tile_uri, 'png8:z=9')
 
     def loop(self):
         while True:

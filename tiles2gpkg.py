@@ -24,11 +24,8 @@ except ImportError:
     from io import BytesIO as ioBuffer
 from time import sleep
 from sys import stdout
-from sys import version_info
 from PIL.Image import open as IOPEN
 
-if version_info[0] == 3:
-    xrange = range
 
 # JPEGs @ 75% provide good quality images with low footprint, use as a default
 # PNGs should be used sparingly (mixed mode) due to their high disk usage RGBA
